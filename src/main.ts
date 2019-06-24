@@ -1,3 +1,5 @@
+const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
+
 type Pos = [number, number];
 
 type Act = Pos;
@@ -5,10 +7,10 @@ type Act = Pos;
 class State {
   field: number[];
   turn: number;
-  w_wall: number;
   b_wall: number;
-  w_pos: Pos;
+  w_wall: number;
   b_pos: Pos;
+  w_pos: Pos;
 
   constructor(initial_turn: number) {
     this.field = Array(17 * 17).fill(0);
@@ -34,7 +36,7 @@ class State {
           // wall or floor
           s += (c == 0) ? "." : "#";
         } else {
-          // token or floor
+          // piece or floor
           if (c == 0) s += "."
           if (c == 1) s += "B"
           if (c == 2) s += "W"
@@ -44,44 +46,44 @@ class State {
     s += `W:${this.w_wall} / B:${this.b_wall}`;
     return s;
   }
+
+  turnString() {
+    return (this.turn == 1) ? "b" : "w"
+  }
 }
 
 function isValid(state: State, act: Act) : boolean {
+  let [ay, ax] = act;
+  if (ay % 2 == 0 && ax % 2 == 0) {
+    // piece move
+    return true;
+  } else {
+    // wall
+    const dy = [1, 0];
+    const dx = [0, 1];
+    const dir = ay % 2;
+    for (let r = 0; r < 3; r++) {
+      const by = ay + r * dy[dir];
+      const bx = ax + r * dx[dir];
+      if (state.field[by * 17 + bx] > 0) return false;
+    }
+
+    for (let r = 0; r < 3; r++) {
+      const by = ay + r * dy[dir];
+      const bx = ax + r * dx[dir];
+      state.field[by * 17 + bx] = 9;
+    }
+    return true;
+  }
   return false;
 }
 
-const board = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
-
-console.log("moruo");
-
 function myfunction(event: Event) {
   let s = (event.target as HTMLDivElement).dataset["pos"];
-  // let [y, x] = s.split(" ").map(z => parseInt(z));
-  let [y, x] = JSON.parse(s);
+  let act = JSON.parse(s);
 
-  if (x % 2 == 0 && y % 2 == 1) {
-    let d = document.createElement("div");
-    d.style.width = 90 + "px";
-    d.style.height = 10 + "px";
-    d.style.top = topPx(y) + "px";
-    d.style.left = topPx(x) + "px";
-    d.classList.add("qf_wall");
-    d.classList.add("qf_bwall");
-
-    board.appendChild(d);
-  }
-
-  if (x % 2 == 1 && y % 2 == 0) {
-    let d = document.createElement("div");
-    d.style.width = 10 + "px";
-    d.style.height = 90 + "px";
-    d.style.top = topPx(y) + "px";
-    d.style.left = topPx(x) + "px";
-    d.classList.add("qf_wall");
-    d.classList.add("qf_bwall");
-
-    board.appendChild(d);
-  }
+  if (!isValid(g_state, act)) return;
+  updateBoard(g_state, act);
 }
 
 function topPx(idx: number) : number {
@@ -90,47 +92,124 @@ function topPx(idx: number) : number {
   return 40 * a + 10 * b;
 }
 
-for (let y=0; y<17; y+=2) {
-  for (let x=0; x<17; x+=2) {
-    let d = document.createElement("div");
-    d.style.width = 40 + "px";
-    d.style.height = 40 + "px";
-    d.style.top = topPx(y) + "px";
-    d.style.left = topPx(x) + "px";
-    d.dataset["pos"] = JSON.stringify([y, x]);
-    d.classList.add("qf_board_grid");
-    d.addEventListener("click", myfunction);
+function prepareGameState() : State {
+  for (let y=0; y<17; y+=2) {
+    for (let x=0; x<17; x+=2) {
+      let d = document.createElement("div");
+      d.style.width = 40 + "px";
+      d.style.height = 40 + "px";
+      d.style.top = topPx(y) + "px";
+      d.style.left = topPx(x) + "px";
+      d.dataset["pos"] = JSON.stringify([y, x]);
+      d.classList.add("qf_board_grid");
+      d.addEventListener("click", myfunction);
 
-    board.appendChild(d);
+      boardDiv.appendChild(d);
+    }
   }
+
+  for (let y=1; y<17; y+=2) {
+    for (let x=0; x<17; x+=2) {
+      let d = document.createElement("div");
+      d.style.width = 40 + "px";
+      d.style.height = 10 + "px";
+      d.style.top = topPx(y) + "px";
+      d.style.left = topPx(x) + "px";
+      d.dataset["pos"] = JSON.stringify([y, x]);
+      d.classList.add("qf_board_space");
+      d.addEventListener("click", myfunction);
+
+      boardDiv.appendChild(d);
+    }
+  }
+
+  for (let y=0; y<17; y+=2) {
+    for (let x=1; x<17; x+=2) {
+      let d = document.createElement("div");
+      d.style.width = 10 + "px";
+      d.style.height = 40 + "px";
+      d.style.top = topPx(y) + "px";
+      d.style.left = topPx(x) + "px";
+      d.dataset["pos"] = JSON.stringify([y, x]);
+      d.classList.add("qf_board_space");
+      d.addEventListener("click", myfunction);
+
+      boardDiv.appendChild(d);
+    }
+  }
+
+  let initial_state = new State(1);
+
+  for (let p = 1; p <= 2; p++) {
+    let [y, x] = (p == 1) ? initial_state.b_pos : initial_state.w_pos;
+
+    let d = document.createElement("div");
+    d.style.width = 36 + "px";
+    d.style.height = 36 + "px";
+    d.style.top = (topPx(y) + 2) + "px";
+    d.style.left = (topPx(x) + 2) + "px";
+    d.classList.add("qf_piece");
+    d.classList.add((p == 1) ? "qf_bpiece" : "qf_wpiece");
+
+    boardDiv.appendChild(d);
+  }
+
+  return initial_state;
 }
 
-for (let y=1; y<17; y+=2) {
-  for (let x=0; x<17; x+=2) {
+function updateBoard(state: State, act: Act) {
+  const [y, x] = act;
+
+  if (x % 2 == 0 && y % 2 == 0) {
+    // piece movement
+    const pieceDiv = document.querySelector(".qf_" + state.turnString() + "piece") as HTMLDivElement;
+    pieceDiv.style.top = (topPx(y) + 2) + "px";
+    pieceDiv.style.left = (topPx(x) + 2) + "px";
+  }
+
+  if (x % 2 == 0 && y % 2 == 1) {
+    // horizontal wall
     let d = document.createElement("div");
-    d.style.width = 40 + "px";
+    d.style.width = 90 + "px";
     d.style.height = 10 + "px";
     d.style.top = topPx(y) + "px";
     d.style.left = topPx(x) + "px";
-    d.dataset["pos"] = JSON.stringify([y, x]);
-    d.classList.add("qf_board_space");
-    d.addEventListener("click", myfunction);
+    d.style.transform = "scale(3)";
+    d.style.opacity = "0";
+    d.classList.add("qf_wall");
+    d.classList.add("qf_hwall");
+    d.classList.add((state.turn == 1) ? "qf_bwall" : "qf_wwall");
 
-    board.appendChild(d);
+    boardDiv.appendChild(d);
+
+    setTimeout(() => {
+      d.style.transform = "scale(1)";
+      d.style.opacity = "1";
+    }, 100);
   }
-}
 
-for (let y=0; y<17; y+=2) {
-  for (let x=1; x<17; x+=2) {
+  if (x % 2 == 1 && y % 2 == 0) {
+    // vertical wall
     let d = document.createElement("div");
     d.style.width = 10 + "px";
-    d.style.height = 40 + "px";
+    d.style.height = 90 + "px";
     d.style.top = topPx(y) + "px";
     d.style.left = topPx(x) + "px";
-    d.dataset["pos"] = JSON.stringify([y, x]);
-    d.classList.add("qf_board_space");
-    d.addEventListener("click", myfunction);
+    d.style.transform = "scale(3)";
+    d.style.opacity = "0";
+    d.classList.add("qf_wall");
+    d.classList.add("qf_vwall");
+    d.classList.add((state.turn == 1) ? "qf_bwall" : "qf_wwall");
 
-    board.appendChild(d);
+    boardDiv.appendChild(d);
+
+    setTimeout(() => {
+      d.style.transform = "scale(1)";
+      d.style.opacity = "1";
+    }, 100);
   }
+
+  state.turn = 3 - state.turn;
 }
+
+let g_state = prepareGameState();

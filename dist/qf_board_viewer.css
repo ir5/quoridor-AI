@@ -45,11 +45,11 @@ http://opensource.org/licenses/mit-license.php
 	position: absolute;
 	border-radius: 50%;
 }
-.qf_piece_white {
+.qf_wpiece {
 	background-color: #F7F2EE;
 	transition: all 0.1s ease 0s;
 }
-.qf_piece_black {
+.qf_bpiece {
 	background-color: #534B44;
 	transition: all 0.1s ease 0s;
 }
