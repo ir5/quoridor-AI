@@ -56,6 +56,10 @@ class State {
     return turnString(this.turn);
   }
 
+  setField(pos: Pos, val: number) {
+    this.field[pos[0] * 17 + pos[1]] = val;
+  }
+
   getField(pos: Pos) : number {
     return this.field[pos[0] * 17 + pos[1]];
   }
@@ -71,8 +75,33 @@ function getCandidateActs(state: State) : Act[] {
   // piece move
   const dir: Pos[] = [[0, -1], [-1, 0], [0, 1], [1, 0]];
   for (let r = 0; r < 4; r++) {
-    const apos = add(pos, dir[r]);
-    if (!isInside(apos) || state.getField(apos) < 0) continue;
+    const a1pos = add(pos, dir[r]);
+    if (!isInside(a1pos) || state.getField(a1pos) >= 0) continue;
+    const a2pos = add(a1pos, dir[r]);
+
+    if (state.getField(a2pos) < 0) {
+      // destination is empty
+      acts.push(a2pos)
+    } else {
+      // destination is occupied by the opponent
+      const a3pos = add(a2pos, dir[r]);
+      if (!isInside(a3pos) || state.getField(a3pos) >= 0) {
+        // wall exists behind the opponent
+        for (let turn = 1; turn <= 3; turn += 2) {
+          const r2 = (r + turn) % 4;
+          const a2t1pos = add(a2pos, dir[r2]);
+          const a2t2pos = add(a2t1pos, dir[r2]);
+
+          if (!isInside(a2t1pos) || state.getField(a2t1pos) >= 0) continue;
+          if (state.getField(a2t2pos) >= 0) continue;
+          acts.push(a2t2pos);
+        }
+      } else {
+        // we can jump across the opponent
+        const a4pos = add(a3pos, dir[r]);
+        acts.push(a4pos);
+      }
+    }
   }
 
   // wall placement
@@ -84,7 +113,10 @@ function isValid(state: State, act: Act) : boolean {
   let [ay, ax] = act;
   if (ay % 2 == 0 && ax % 2 == 0) {
     // piece move
-    return true;
+    console.log(act);
+    console.log(g_candidate_acts.join('   '));
+    console.log(g_candidate_acts.some((e) => {e[0] == act[0] && e[1] == act[1]}));
+    return g_candidate_acts.some((e) => { return e[0] == act[0] && e[1] == act[1]; });
   } else {
     // wall
     const dy = [1, 0];
@@ -213,6 +245,10 @@ function updateBoard(state: State, act: Act) {
     const pieceDiv = document.querySelector(".qf_" + state.turnString() + "piece") as HTMLDivElement;
     pieceDiv.style.top = (topPx(y) + 2) + "px";
     pieceDiv.style.left = (topPx(x) + 2) + "px";
+
+    state.setField(state.poses[state.turn], -1);
+    state.setField(act, state.turn);
+    state.poses[state.turn] = act;
   }
 
   if (x % 2 != y % 2) {
@@ -251,7 +287,10 @@ function updateBoard(state: State, act: Act) {
     }, 100);
   }
 
+  // update the state
   state.turn = 1 - state.turn;
+  g_candidate_acts = getCandidateActs(state);
 }
 
 let g_state = prepareGameState();
+let g_candidate_acts = getCandidateActs(g_state);
