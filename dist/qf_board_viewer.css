@@ -1,0 +1,138 @@
+/*
+qf_board_viewer.css
+Copyright (c) 2014 Quoridor Fansite Webmaster
+Released under the MIT license
+http://opensource.org/licenses/mit-license.php
+*/
+
+.qf_board_viewer {
+	position: relative;
+}
+
+.qf_board_viewer div, .qf_board_viewer button, .qf_board_viewer textarea {
+	margin: 0;
+	padding: 0;
+}
+
+.qf_gameboard {
+	background-color: #B0A092;
+	position: absolute;
+	border-radius: 5%;
+}
+.qf_boardInversed {
+	-webkit-transform: rotate(180deg);
+	-moz-transform: rotate(180deg);
+	-ms-transform: rotate(180deg);
+	-o-transform: rotate(180deg);
+	transform: rotate(180deg);
+}
+
+.qf_inner_gameboard {
+	position: absolute;
+}
+
+.qf_board_grid {
+	background-color: #A18E80;
+	position: absolute;
+	border-radius: 5%;
+}
+
+.qf_board_space {
+	position: absolute;
+}
+
+.qf_piece {
+	position: absolute;
+	border-radius: 50%;
+}
+.qf_piece_white {
+	background-color: #F7F2EE;
+	transition: all 0.1s ease 0s;
+}
+.qf_piece_black {
+	background-color: #534B44;
+	transition: all 0.1s ease 0s;
+}
+
+.qf_wall {
+	position: absolute;
+}
+.qf_wwall {
+	background-color: #F7F2EE;
+	transition: all 0.2s ease 0s;
+}
+.qf_bwall {
+	background-color: #534B44;
+	transition: all 0.2s ease 0s;
+}
+.qf_hwall {
+	border-radius: 5% / 20%;
+}
+.qf_vwall {
+	border-radius: 20% / 5%;
+}
+
+.qf_infobar {
+	position: absolute;
+	border-bottom: solid #948073;
+}
+.qf_info_text {
+	position: absolute;
+	text-align: center;
+	color: #534B44;
+}
+.qf_info_turn {
+}
+.qf_info_white {
+}
+.qf_info_black {
+}
+.qf_info_text_num {
+	position: absolute;
+	text-align: center;
+	color: #534B44;
+}
+.qf_info_turn_num {
+}
+.qf_info_white_num {
+}
+.qf_info_black_num {
+}
+
+
+.qf_controlpanel {
+	position: absolute;
+}
+.qf_control_button {
+	position: absolute;
+	border: none;
+	outline: none;
+	cursor: pointer;
+	
+	color: #F7F2EE;
+	text-align: center;
+
+	border-radius: 7% / 14%;
+}
+.qf_b_back, .qf_b_next {
+	background-color: #D76969;
+}
+.qf_b_back:hover, .qf_b_next:hover {
+	background-color: #E17878;
+}
+.qf_b_back:active, .qf_b_next:active {
+	background-color: #EB8484;
+}
+.qf_cb_cover {
+	cursor: default;
+	background-color: rgba(245, 243, 232, 0.8);
+	border-radius: 6% / 12%;
+}
+
+
+.qf_highlighted {
+	border-color: #EB5454;
+}
+.qf_gwall {
+	background-color: #5E564F;
+}
