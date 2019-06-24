@@ -9,33 +9,6 @@ function turnString(turn: number) : string {
 function isValid(state: State, act: Act) : boolean {
   let [ay, ax] = act;
   return g_candidate_acts.some((e) => { return e[0] == act[0] && e[1] == act[1]; });
-  /*
-  if (ay % 2 == 0 && ax % 2 == 0) {
-    // piece move
-    console.log(act);
-    console.log(g_candidate_acts.join('   '));
-    console.log(g_candidate_acts.some((e) => {e[0] == act[0] && e[1] == act[1]}));
-    return g_candidate_acts.some((e) => { return e[0] == act[0] && e[1] == act[1]; });
-  } else {
-    // wall
-    const dy = [1, 0];
-    const dx = [0, 1];
-    const dir = ay % 2;
-    for (let r = 0; r < 3; r++) {
-      const by = ay + r * dy[dir];
-      const bx = ax + r * dx[dir];
-      if (state.field[by * 17 + bx] > 0) return false;
-    }
-
-    for (let r = 0; r < 3; r++) {
-      const by = ay + r * dy[dir];
-      const bx = ax + r * dx[dir];
-      state.field[by * 17 + bx] = 9;
-    }
-    return true;
-  }
-  return false;
-   */
 }
 
 function myfunction(event: Event) {

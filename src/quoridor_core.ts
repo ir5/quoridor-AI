@@ -100,18 +100,34 @@ candidate_loop:
     for (let x = (y + 1) % 2; x < 17; x += 2) {
       const dir: Pos = (y % 2 == 0) ? [-1, 0] : [0, 1];
       // the position must not be occupied
+      let places: Pos[] = [];
       let now: Pos = [y, x];
       for (let i = 0; i < 3; i++) {
+        places.push(now);
         if (!isInside(now) || state.getField(now) >= 0) continue candidate_loop;
         now = add(now, dir);
       }
 
       // check if the reachability condition holds after placement
-      acts.push([y, x]);
+      for (let i = 0; i < 3; i++) {
+        // temporarily fill the space
+        state.setField(places[i], 6);
+      }
+
+      if (checkReachability(state)) {
+        acts.push([y, x]);
+      }
+
+      // revert the filled space
+      for (let i = 0; i < 3; i++) state.setField(places[i], -1);
     }
   }
 
   return acts;
+}
+
+function checkReachability(state: State) : boolean {
+  return true;
 }
 
 export function applyAct(state: State, act: Act) {
