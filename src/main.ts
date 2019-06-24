@@ -47,9 +47,13 @@ class State {
     return s;
   }
 
-  turnString() {
-    return (this.turn == 1) ? "b" : "w"
+  turnString() : string {
+    return turnString(this.turn);
   }
+}
+
+function turnString(turn: number) : string {
+  return (turn == 1) ? "b" : "w";
 }
 
 function isValid(state: State, act: Act) : boolean {
@@ -93,6 +97,7 @@ function topPx(idx: number) : number {
 }
 
 function prepareGameState() : State {
+  // cells
   for (let y=0; y<17; y+=2) {
     for (let x=0; x<17; x+=2) {
       let d = document.createElement("div");
@@ -108,6 +113,7 @@ function prepareGameState() : State {
     }
   }
 
+  // spaces
   for (let y=1; y<17; y+=2) {
     for (let x=0; x<17; x+=2) {
       let d = document.createElement("div");
@@ -122,7 +128,6 @@ function prepareGameState() : State {
       boardDiv.appendChild(d);
     }
   }
-
   for (let y=0; y<17; y+=2) {
     for (let x=1; x<17; x+=2) {
       let d = document.createElement("div");
@@ -140,6 +145,25 @@ function prepareGameState() : State {
 
   let initial_state = new State(1);
 
+  // remaining walls
+  for (let i = 0; i < initial_state.b_wall; i++) {
+    for (let p = 1; p <= 2; p++) {
+      let d = document.createElement("div");
+      d.style.width = 10 + "px";
+      d.style.height = 40 + "px";
+      d.style.top = ((p == 1) ? topPx(17) : -40) + "px";
+      d.style.left = (topPx(i * 2) - 10) + "px";
+      d.dataset["idx"] = i.toString();
+      d.classList.add("qf_wall");
+      d.classList.add("qf_" + turnString(p) + "wall");
+      d.classList.add("qf_vwall");
+      d.classList.add("qf_remaining_" + turnString(p) + "wall"); // for search
+      d.addEventListener("click", myfunction);
+
+      boardDiv.appendChild(d);
+    }
+  }
+
   for (let p = 1; p <= 2; p++) {
     let [y, x] = (p == 1) ? initial_state.b_pos : initial_state.w_pos;
 
@@ -149,7 +173,7 @@ function prepareGameState() : State {
     d.style.top = (topPx(y) + 2) + "px";
     d.style.left = (topPx(x) + 2) + "px";
     d.classList.add("qf_piece");
-    d.classList.add((p == 1) ? "qf_bpiece" : "qf_wpiece");
+    d.classList.add("qf_" + turnString(p) + "piece");
 
     boardDiv.appendChild(d);
   }
@@ -167,41 +191,38 @@ function updateBoard(state: State, act: Act) {
     pieceDiv.style.left = (topPx(x) + 2) + "px";
   }
 
-  if (x % 2 == 0 && y % 2 == 1) {
-    // horizontal wall
+  if (x % 2 != y % 2) {
+    // wall
     let d = document.createElement("div");
-    d.style.width = 90 + "px";
-    d.style.height = 10 + "px";
+
+    if (x % 2 == 0) {
+      // horizontal
+      d.style.width = 90 + "px";
+      d.style.height = 10 + "px";
+      d.classList.add("qf_hwall");
+    } else {
+      // vertical
+      d.style.width = 10 + "px";
+      d.style.height = 90 + "px";
+      d.classList.add("qf_vwall");
+    }
     d.style.top = topPx(y) + "px";
     d.style.left = topPx(x) + "px";
     d.style.transform = "scale(3)";
     d.style.opacity = "0";
     d.classList.add("qf_wall");
-    d.classList.add("qf_hwall");
-    d.classList.add((state.turn == 1) ? "qf_bwall" : "qf_wwall");
+    d.classList.add("qf_" + state.turnString() + "wall");
 
     boardDiv.appendChild(d);
 
-    setTimeout(() => {
-      d.style.transform = "scale(1)";
-      d.style.opacity = "1";
-    }, 100);
-  }
-
-  if (x % 2 == 1 && y % 2 == 0) {
-    // vertical wall
-    let d = document.createElement("div");
-    d.style.width = 10 + "px";
-    d.style.height = 90 + "px";
-    d.style.top = topPx(y) + "px";
-    d.style.left = topPx(x) + "px";
-    d.style.transform = "scale(3)";
-    d.style.opacity = "0";
-    d.classList.add("qf_wall");
-    d.classList.add("qf_vwall");
-    d.classList.add((state.turn == 1) ? "qf_bwall" : "qf_wwall");
-
-    boardDiv.appendChild(d);
+    if (state.turn == 1) {
+      state.b_wall--;
+    } else {
+      state.w_wall--;
+    }
+    const idx = (state.turn == 1) ? state.b_wall : state.w_wall;
+    let remaining = document.querySelector(`.qf_remaining_${state.turnString()}wall[data-idx="${idx}"]`) as HTMLDivElement;
+    remaining.style.opacity = "0";
 
     setTimeout(() => {
       d.style.transform = "scale(1)";
