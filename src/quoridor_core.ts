@@ -98,12 +98,15 @@ export function getCandidateActs(state: State) : Act[] {
   for (let y = 0; y < 17; y++) {
 candidate_loop:
     for (let x = (y + 1) % 2; x < 17; x += 2) {
-      const dir: Pos = (y % 2 == 0) ? [1, 0] : [0, 1];
+      const dir: Pos = (y % 2 == 0) ? [-1, 0] : [0, 1];
+      // the position must not be occupied
       let now: Pos = [y, x];
       for (let i = 0; i < 3; i++) {
         if (!isInside(now) || state.getField(now) >= 0) continue candidate_loop;
         now = add(now, dir);
       }
+
+      // check if the reachability condition holds after placement
       acts.push([y, x]);
     }
   }
@@ -122,7 +125,7 @@ export function applyAct(state: State, act: Act) {
   } else if (x % 2 != y % 2) {
     // wall placement
     state.walls[state.turn]--;
-    const dir: Pos = (y % 2 == 0) ? [1, 0] : [0, 1];
+    const dir: Pos = (y % 2 == 0) ? [-1, 0] : [0, 1];
 
     for (let i = 0; i < 3; i++) {
       const by = y + i * dir[0];

@@ -155,14 +155,15 @@ function updateBoard(act: Act) {
       // horizontal
       d.style.width = 90 + "px";
       d.style.height = 10 + "px";
+      d.style.top = topPx(y) + "px";
       d.classList.add("qf_hwall");
     } else {
       // vertical
       d.style.width = 10 + "px";
       d.style.height = 90 + "px";
+      d.style.top = topPx(y - 2) + "px";
       d.classList.add("qf_vwall");
     }
-    d.style.top = topPx(y) + "px";
     d.style.left = topPx(x) + "px";
     d.style.transform = "scale(3)";
     d.style.opacity = "0";
