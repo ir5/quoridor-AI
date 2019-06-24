@@ -2,26 +2,31 @@ const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement
 
 type Pos = [number, number];
 
+function add(p: Pos, q: Pos) : Pos {
+  return [p[0] + q[0], p[1] + q[1]];
+}
+
+function isInside(p: Pos) : boolean {
+  const [y, x] = p;
+  return y >= 0 && x >= 0 && y < 17 && x < 17;
+}
+
 type Act = Pos;
 
 class State {
   field: number[];
   turn: number;
-  b_wall: number;
-  w_wall: number;
-  b_pos: Pos;
-  w_pos: Pos;
+  walls: number[];
+  poses: Pos[];
 
   constructor(initial_turn: number) {
-    this.field = Array(17 * 17).fill(0);
-    this.field[0 * 17 + 8] = 1;
-    this.field[16 * 17 + 8] = 2;
+    this.field = Array(17 * 17).fill(-1);
+    this.field[0 * 17 + 8] = 0;
+    this.field[16 * 17 + 8] = 1;
 
     this.turn = initial_turn;
-    this.b_wall = 10;
-    this.w_wall = 10;
-    this.b_pos = [16, 8];
-    this.w_pos = [0, 8];
+    this.walls = [10, 10];
+    this.poses = [[16, 8], [0, 8]];
   }
 
   toString() {
@@ -34,26 +39,45 @@ class State {
           s += " ";
         } else if (y % 2 == 1 || x % 2 == 1) {
           // wall or floor
-          s += (c == 0) ? "." : "#";
+          s += (c == -1) ? "." : "#";
         } else {
           // piece or floor
-          if (c == 0) s += "."
-          if (c == 1) s += "B"
-          if (c == 2) s += "W"
+          if (c == -1) s += "."
+          if (c == 0) s += "B"
+          if (c == 1) s += "W"
         }
       }
     }
-    s += `W:${this.w_wall} / B:${this.b_wall}`;
+    s += `W:${this.walls[1]} / B:${this.walls[0]}`;
     return s;
   }
 
   turnString() : string {
     return turnString(this.turn);
   }
+
+  getField(pos: Pos) : number {
+    return this.field[pos[0] * 17 + pos[1]];
+  }
 }
 
 function turnString(turn: number) : string {
-  return (turn == 1) ? "b" : "w";
+  return (turn == 0) ? "b" : "w";
+}
+
+function getCandidateActs(state: State) : Act[] {
+  let acts: Act[] = [];
+  const pos: Pos = state.poses[state.turn];
+  // piece move
+  const dir: Pos[] = [[0, -1], [-1, 0], [0, 1], [1, 0]];
+  for (let r = 0; r < 4; r++) {
+    const apos = add(pos, dir[r]);
+    if (!isInside(apos) || state.getField(apos) < 0) continue;
+  }
+
+  // wall placement
+
+  return acts;
 }
 
 function isValid(state: State, act: Act) : boolean {
@@ -139,6 +163,7 @@ function prepareGameState() : State {
       d.classList.add("qf_board_space");
       d.addEventListener("click", myfunction);
 
+
       boardDiv.appendChild(d);
     }
   }
@@ -146,26 +171,25 @@ function prepareGameState() : State {
   let initial_state = new State(1);
 
   // remaining walls
-  for (let i = 0; i < initial_state.b_wall; i++) {
-    for (let p = 1; p <= 2; p++) {
+  for (let i = 0; i < initial_state.walls[0]; i++) {
+    for (let p = 0; p <= 1; p++) {
       let d = document.createElement("div");
       d.style.width = 10 + "px";
       d.style.height = 40 + "px";
-      d.style.top = ((p == 1) ? topPx(17) : -40) + "px";
+      d.style.top = ((p == 0) ? topPx(17) : -40) + "px";
       d.style.left = (topPx(i * 2) - 10) + "px";
       d.dataset["idx"] = i.toString();
       d.classList.add("qf_wall");
       d.classList.add("qf_" + turnString(p) + "wall");
       d.classList.add("qf_vwall");
       d.classList.add("qf_remaining_" + turnString(p) + "wall"); // for search
-      d.addEventListener("click", myfunction);
 
       boardDiv.appendChild(d);
     }
   }
 
-  for (let p = 1; p <= 2; p++) {
-    let [y, x] = (p == 1) ? initial_state.b_pos : initial_state.w_pos;
+  for (let p = 0; p <= 1; p++) {
+    let [y, x] = initial_state.poses[p];
 
     let d = document.createElement("div");
     d.style.width = 36 + "px";
@@ -215,12 +239,9 @@ function updateBoard(state: State, act: Act) {
 
     boardDiv.appendChild(d);
 
-    if (state.turn == 1) {
-      state.b_wall--;
-    } else {
-      state.w_wall--;
-    }
-    const idx = (state.turn == 1) ? state.b_wall : state.w_wall;
+    // update the number of remaining walls
+    state.walls[state.turn]--;
+    const idx = state.walls[state.turn];
     let remaining = document.querySelector(`.qf_remaining_${state.turnString()}wall[data-idx="${idx}"]`) as HTMLDivElement;
     remaining.style.opacity = "0";
 
@@ -230,7 +251,7 @@ function updateBoard(state: State, act: Act) {
     }, 100);
   }
 
-  state.turn = 3 - state.turn;
+  state.turn = 1 - state.turn;
 }
 
 let g_state = prepareGameState();
