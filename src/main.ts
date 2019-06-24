@@ -6,17 +6,34 @@ function turnString(turn: number) : string {
   return (turn == 0) ? "b" : "w";
 }
 
-function isValid(state: State, act: Act) : boolean {
+function isValid(act: Act) : boolean {
   let [ay, ax] = act;
   return g_candidate_acts.some((e) => { return e[0] == act[0] && e[1] == act[1]; });
 }
 
-function myfunction(event: Event) {
+function invokeAct(event: Event) {
   let s = (event.target as HTMLDivElement).dataset["pos"];
   let act = JSON.parse(s);
 
-  if (!isValid(g_state, act)) return;
+  if (!isValid(act)) return;
   updateBoard(act);
+}
+
+function showPieceShadow(event: Event) {
+  let [y, x] = JSON.parse((event.target as HTMLDivElement).dataset["pos"]);
+  if (isValid([y, x])) {
+    const shadowDiv = document.querySelector(".qf_" + turnString(g_state.turn) + "piece2") as HTMLDivElement;
+    shadowDiv.style.top = (topPx(y) + 2) + "px";
+    shadowDiv.style.left = (topPx(x) + 2) + "px";
+    shadowDiv.style.visibility = "visible";
+  }
+}
+
+function clearPieceShadow(event: Event) {
+  for (let p = 0; p <= 1; p++) {
+    const shadowDiv = document.querySelector(".qf_" + turnString(p) + "piece2") as HTMLDivElement;
+    shadowDiv.style.visibility = "hidden";
+  }
 }
 
 function topPx(idx: number) : number {
@@ -36,11 +53,27 @@ function prepareGameState() : State {
       d.style.left = topPx(x) + "px";
       d.dataset["pos"] = JSON.stringify([y, x]);
       d.classList.add("qf_board_grid");
-      d.addEventListener("click", myfunction);
+      d.addEventListener("click", invokeAct);
+      d.addEventListener("mouseenter", showPieceShadow);
+      d.addEventListener("mouseleave", clearPieceShadow);
 
       boardDiv.appendChild(d);
     }
   }
+
+  // shadow of piece
+  for (let p = 0; p <= 1; p++) {
+    let d = document.createElement("div");
+    d.style.width = 36 + "px";
+    d.style.height = 36 + "px";
+    d.style.top = "0px";
+    d.style.left = "0px";
+    d.style.visibility = "hidden";
+    d.classList.add("qf_piece");
+    d.classList.add("qf_" + turnString(p) + "piece2");
+    boardDiv.appendChild(d);
+  }
+
 
   // spaces
   for (let y=1; y<17; y+=2) {
@@ -52,7 +85,7 @@ function prepareGameState() : State {
       d.style.left = topPx(x) + "px";
       d.dataset["pos"] = JSON.stringify([y, x]);
       d.classList.add("qf_board_space");
-      d.addEventListener("click", myfunction);
+      d.addEventListener("click", invokeAct);
 
       boardDiv.appendChild(d);
     }
@@ -66,7 +99,7 @@ function prepareGameState() : State {
       d.style.left = topPx(x) + "px";
       d.dataset["pos"] = JSON.stringify([y, x]);
       d.classList.add("qf_board_space");
-      d.addEventListener("click", myfunction);
+      d.addEventListener("click", invokeAct);
 
 
       boardDiv.appendChild(d);

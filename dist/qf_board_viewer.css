@@ -53,6 +53,14 @@ http://opensource.org/licenses/mit-license.php
 	background-color: #534B44;
 	transition: all 0.1s ease 0s;
 }
+.qf_wpiece2 {
+  background-color: rgba(247, 242, 238, 0.6);
+  pointer-events: none;
+}
+.qf_bpiece2 {
+  background-color: rgba(83, 75, 68, 0.6);
+  pointer-events: none;
+}
 
 .qf_wall {
 	position: absolute;
