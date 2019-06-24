@@ -1,4 +1,5 @@
 import {Pos, State, Act, getCandidateActs, applyAct, isGameOver} from "./quoridor_core";
+import {naiveAgent} from "./agents/naive/naive"
 
 const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
 
@@ -22,6 +23,11 @@ function invokeAct(event: Event) {
   if (winner >= 0) {
     showWinningText(winner);
   }
+
+  setTimeout(() => {
+    let cpu_act = naiveAgent(g_state);
+    updateBoard(cpu_act);
+  }, 500);
 }
 
 function showPieceShadow(event: Event) {
@@ -59,7 +65,7 @@ function showWallShadow(event: Event) {
 function clearWallShadow(event: Event) {
   for (let p = 0; p <= 1; p++) {
     for (let dir = 0; dir <= 1; dir++) {
-      const shadowDiv = document.querySelector(`.qf_wall[data-wall_shadow="${g_state.turn}${dir}"]`) as HTMLDivElement;
+      const shadowDiv = document.querySelector(`.qf_wall[data-wall_shadow="${p}${dir}"]`) as HTMLDivElement;
       shadowDiv.style.visibility = "hidden";
     }
   }
