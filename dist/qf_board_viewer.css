@@ -88,6 +88,20 @@ http://opensource.org/licenses/mit-license.php
   pointer-events: none;
 }
 
+.qf_winning_text {
+	position: absolute;
+	text-align: center;
+        font-size: 30px;
+}
+.qf_winning_wtext {
+  color: #534B44;
+  background-color: rgba(247, 242, 238, 0.8);
+}
+.qf_winning_btext {
+  color: #F7F2EE;
+  background-color: rgba(83, 75, 68, 0.8);
+}
+
 .qf_infobar {
 	position: absolute;
 	border-bottom: solid #948073;

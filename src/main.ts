@@ -1,4 +1,4 @@
-import {Pos, State, Act, getCandidateActs, applyAct} from "./quoridor_core";
+import {Pos, State, Act, getCandidateActs, applyAct, isGameOver} from "./quoridor_core";
 
 const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
 
@@ -17,6 +17,11 @@ function invokeAct(event: Event) {
 
   if (!isValid(act)) return;
   updateBoard(act);
+
+  const winner = isGameOver(g_state);
+  if (winner >= 0) {
+    showWinningText(winner);
+  }
 }
 
 function showPieceShadow(event: Event) {
@@ -58,6 +63,24 @@ function clearWallShadow(event: Event) {
       shadowDiv.style.visibility = "hidden";
     }
   }
+}
+
+function showWinningText(winning_player: number) {
+  let d = document.createElement("div");
+  d.style.width = "440px";
+  d.style.height = "40px";
+  if (winning_player == 0) {
+    d.style.top = "-50px";
+    d.classList.add("qf_winning_btext");
+  } else {
+    d.style.top = "450px";
+    d.classList.add("qf_winning_wtext");
+  }
+  d.style.left = "0px";
+  d.classList.add("qf_winning_text");
+  d.innerText = "MORUO WON!!";
+
+  boardDiv.appendChild(d);
 }
 
 function topPx(idx: number) : number {

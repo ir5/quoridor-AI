@@ -177,3 +177,12 @@ export function applyAct(state: State, act: Act) {
 
   state.turn = 1 - state.turn;
 }
+
+export function isGameOver(state: State): number {
+  if (state.poses[0][0] == 0) {
+    return 0;
+  } else if (state.poses[1][0] == 16) {
+    return 1;
+  }
+  return -1;
+}
