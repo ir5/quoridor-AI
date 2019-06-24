@@ -43,6 +43,7 @@ export class State {
           if (c == 1) s += "W"
         }
       }
+      s += "\n";
     }
     s += `W:${this.walls[1]} / B:${this.walls[0]}`;
     return s;
@@ -113,11 +114,9 @@ candidate_loop:
         // temporarily fill the space
         state.setField(places[i], 6);
       }
-
       if (checkReachability(state)) {
         acts.push([y, x]);
       }
-
       // revert the filled space
       for (let i = 0; i < 3; i++) state.setField(places[i], -1);
     }
@@ -127,6 +126,32 @@ candidate_loop:
 }
 
 function checkReachability(state: State) : boolean {
+loop_player:
+  for (let p = 0; p <= 1; p += 1) {
+    let q: Pos[] = [state.poses[p]];
+    let visited: boolean[] = Array(17 * 17).fill(false);
+
+    while (q.length > 0) {
+      let now: Pos = q.pop();
+      if (visited[now[0] * 17 + now[1]]) continue;
+      visited[now[0] * 17 + now[1]] = true;
+
+      if (p == 0 && now[0] == 0) continue loop_player;
+      if (p == 1 && now[0] == 16) continue loop_player;
+
+      const dir: Pos[] = [[0, -1], [-1, 0], [0, 1], [1, 0]];
+      for (let r = 0; r < 4; r++) {
+        let sub = add(now, dir[r]);
+        if (!isInside(sub) || state.getField(sub) >= 0) continue;  // wall
+        let next = add(sub, dir[r]);
+        if (visited[next[0] * 17 + next[1]]) continue;
+        q.push(next);
+      }
+    }
+
+    // unreachable
+    return false;
+  }
   return true;
 }
 
