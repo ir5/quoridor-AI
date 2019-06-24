@@ -1,116 +1,15 @@
+import {Pos, State, Act, getCandidateActs, applyAct} from "./quoridor_core";
+
 const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
-
-type Pos = [number, number];
-
-function add(p: Pos, q: Pos) : Pos {
-  return [p[0] + q[0], p[1] + q[1]];
-}
-
-function isInside(p: Pos) : boolean {
-  const [y, x] = p;
-  return y >= 0 && x >= 0 && y < 17 && x < 17;
-}
-
-type Act = Pos;
-
-class State {
-  field: number[];
-  turn: number;
-  walls: number[];
-  poses: Pos[];
-
-  constructor(initial_turn: number) {
-    this.field = Array(17 * 17).fill(-1);
-    this.field[0 * 17 + 8] = 0;
-    this.field[16 * 17 + 8] = 1;
-
-    this.turn = initial_turn;
-    this.walls = [10, 10];
-    this.poses = [[16, 8], [0, 8]];
-  }
-
-  toString() {
-    let s = "";
-    for (let y = 0; y < 17; y++) {
-      for (let x = 0; x < 17; x++) {
-        let c = this.field[y * 17 + x];
-        if (y % 2 == 1 && x % 2 == 1) {
-          // none
-          s += " ";
-        } else if (y % 2 == 1 || x % 2 == 1) {
-          // wall or floor
-          s += (c == -1) ? "." : "#";
-        } else {
-          // piece or floor
-          if (c == -1) s += "."
-          if (c == 0) s += "B"
-          if (c == 1) s += "W"
-        }
-      }
-    }
-    s += `W:${this.walls[1]} / B:${this.walls[0]}`;
-    return s;
-  }
-
-  turnString() : string {
-    return turnString(this.turn);
-  }
-
-  setField(pos: Pos, val: number) {
-    this.field[pos[0] * 17 + pos[1]] = val;
-  }
-
-  getField(pos: Pos) : number {
-    return this.field[pos[0] * 17 + pos[1]];
-  }
-}
 
 function turnString(turn: number) : string {
   return (turn == 0) ? "b" : "w";
 }
 
-function getCandidateActs(state: State) : Act[] {
-  let acts: Act[] = [];
-  const pos: Pos = state.poses[state.turn];
-  // piece move
-  const dir: Pos[] = [[0, -1], [-1, 0], [0, 1], [1, 0]];
-  for (let r = 0; r < 4; r++) {
-    const a1pos = add(pos, dir[r]);
-    if (!isInside(a1pos) || state.getField(a1pos) >= 0) continue;
-    const a2pos = add(a1pos, dir[r]);
-
-    if (state.getField(a2pos) < 0) {
-      // destination is empty
-      acts.push(a2pos)
-    } else {
-      // destination is occupied by the opponent
-      const a3pos = add(a2pos, dir[r]);
-      if (!isInside(a3pos) || state.getField(a3pos) >= 0) {
-        // wall exists behind the opponent
-        for (let turn = 1; turn <= 3; turn += 2) {
-          const r2 = (r + turn) % 4;
-          const a2t1pos = add(a2pos, dir[r2]);
-          const a2t2pos = add(a2t1pos, dir[r2]);
-
-          if (!isInside(a2t1pos) || state.getField(a2t1pos) >= 0) continue;
-          if (state.getField(a2t2pos) >= 0) continue;
-          acts.push(a2t2pos);
-        }
-      } else {
-        // we can jump across the opponent
-        const a4pos = add(a3pos, dir[r]);
-        acts.push(a4pos);
-      }
-    }
-  }
-
-  // wall placement
-
-  return acts;
-}
-
 function isValid(state: State, act: Act) : boolean {
   let [ay, ax] = act;
+  return g_candidate_acts.some((e) => { return e[0] == act[0] && e[1] == act[1]; });
+  /*
   if (ay % 2 == 0 && ax % 2 == 0) {
     // piece move
     console.log(act);
@@ -136,6 +35,7 @@ function isValid(state: State, act: Act) : boolean {
     return true;
   }
   return false;
+   */
 }
 
 function myfunction(event: Event) {
@@ -143,7 +43,7 @@ function myfunction(event: Event) {
   let act = JSON.parse(s);
 
   if (!isValid(g_state, act)) return;
-  updateBoard(g_state, act);
+  updateBoard(act);
 }
 
 function topPx(idx: number) : number {
@@ -237,18 +137,14 @@ function prepareGameState() : State {
   return initial_state;
 }
 
-function updateBoard(state: State, act: Act) {
+function updateBoard(act: Act) {
   const [y, x] = act;
 
   if (x % 2 == 0 && y % 2 == 0) {
     // piece movement
-    const pieceDiv = document.querySelector(".qf_" + state.turnString() + "piece") as HTMLDivElement;
+    const pieceDiv = document.querySelector(".qf_" + turnString(g_state.turn) + "piece") as HTMLDivElement;
     pieceDiv.style.top = (topPx(y) + 2) + "px";
     pieceDiv.style.left = (topPx(x) + 2) + "px";
-
-    state.setField(state.poses[state.turn], -1);
-    state.setField(act, state.turn);
-    state.poses[state.turn] = act;
   }
 
   if (x % 2 != y % 2) {
@@ -271,14 +167,13 @@ function updateBoard(state: State, act: Act) {
     d.style.transform = "scale(3)";
     d.style.opacity = "0";
     d.classList.add("qf_wall");
-    d.classList.add("qf_" + state.turnString() + "wall");
+    d.classList.add("qf_" + turnString(g_state.turn) + "wall");
 
     boardDiv.appendChild(d);
 
     // update the number of remaining walls
-    state.walls[state.turn]--;
-    const idx = state.walls[state.turn];
-    let remaining = document.querySelector(`.qf_remaining_${state.turnString()}wall[data-idx="${idx}"]`) as HTMLDivElement;
+    const idx = g_state.walls[g_state.turn] - 1;
+    let remaining = document.querySelector(`.qf_remaining_${turnString(g_state.turn)}wall[data-idx="${idx}"]`) as HTMLDivElement;
     remaining.style.opacity = "0";
 
     setTimeout(() => {
@@ -288,8 +183,10 @@ function updateBoard(state: State, act: Act) {
   }
 
   // update the state
-  state.turn = 1 - state.turn;
-  g_candidate_acts = getCandidateActs(state);
+  applyAct(g_state, act);
+
+  // update the candidate actions
+  g_candidate_acts = getCandidateActs(g_state);
 }
 
 let g_state = prepareGameState();
