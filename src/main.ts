@@ -36,6 +36,30 @@ function clearPieceShadow(event: Event) {
   }
 }
 
+function showWallShadow(event: Event) {
+  let [y, x] = JSON.parse((event.target as HTMLDivElement).dataset["pos"]);
+  if (isValid([y, x])) {
+    const dir = y % 2;
+    const shadowDiv = document.querySelector(`.qf_wall[data-wall_shadow="${g_state.turn}${dir}"]`) as HTMLDivElement;
+    if (dir == 0) {
+      shadowDiv.style.top = topPx(y - 2) + "px";
+    } else {
+      shadowDiv.style.top = topPx(y) + "px";
+    }
+    shadowDiv.style.left = topPx(x) + "px";
+    shadowDiv.style.visibility = "visible";
+  }
+}
+
+function clearWallShadow(event: Event) {
+  for (let p = 0; p <= 1; p++) {
+    for (let dir = 0; dir <= 1; dir++) {
+      const shadowDiv = document.querySelector(`.qf_wall[data-wall_shadow="${g_state.turn}${dir}"]`) as HTMLDivElement;
+      shadowDiv.style.visibility = "hidden";
+    }
+  }
+}
+
 function topPx(idx: number) : number {
   const a = Math.floor((idx + 1) / 2);
   const b = Math.floor(idx / 2);
@@ -74,34 +98,48 @@ function prepareGameState() : State {
     boardDiv.appendChild(d);
   }
 
-
   // spaces
-  for (let y=1; y<17; y+=2) {
-    for (let x=0; x<17; x+=2) {
+  for (let y = 0; y < 17; y++) {
+    for (let x = (y + 1) % 2; x < 17; x += 2) {
       let d = document.createElement("div");
-      d.style.width = 40 + "px";
-      d.style.height = 10 + "px";
+      if (y % 2 == 0) {
+        d.style.width = 10 + "px";
+        d.style.height = 40 + "px";
+      } else {
+        d.style.width = 40 + "px";
+        d.style.height = 10 + "px";
+      }
       d.style.top = topPx(y) + "px";
       d.style.left = topPx(x) + "px";
       d.dataset["pos"] = JSON.stringify([y, x]);
       d.classList.add("qf_board_space");
       d.addEventListener("click", invokeAct);
+      d.addEventListener("mouseenter", showWallShadow);
+      d.addEventListener("mouseleave", clearWallShadow);
 
       boardDiv.appendChild(d);
     }
   }
-  for (let y=0; y<17; y+=2) {
-    for (let x=1; x<17; x+=2) {
+
+  // shadow of walls
+  for (let p = 0; p <= 1; p++) {
+    for (let dir = 0; dir < 2; dir++) {
       let d = document.createElement("div");
-      d.style.width = 10 + "px";
-      d.style.height = 40 + "px";
-      d.style.top = topPx(y) + "px";
-      d.style.left = topPx(x) + "px";
-      d.dataset["pos"] = JSON.stringify([y, x]);
-      d.classList.add("qf_board_space");
-      d.addEventListener("click", invokeAct);
-
-
+      if (dir == 0) {
+        d.style.width = 10 + "px";
+        d.style.height = 90 + "px";
+        d.classList.add("qf_hwall");
+      } else {
+        d.style.width = 90 + "px";
+        d.style.height = 10 + "px";
+        d.classList.add("qf_vwall");
+      }
+      d.style.top = "0px";
+      d.style.left = "0px";
+      d.style.visibility = "hidden";
+      d.dataset["wall_shadow"] = `${p}${dir}`;
+      d.classList.add("qf_wall");
+      d.classList.add("qf_" + turnString(p) + "wall2");
       boardDiv.appendChild(d);
     }
   }
