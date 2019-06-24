@@ -50,7 +50,7 @@ function isValid(state: State, act: Act) : boolean {
   return false;
 }
 
-const board = document.querySelector(".qf_board_viewer") as HTMLDivElement;
+const board = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
 
 console.log("moruo");
 
@@ -134,7 +134,3 @@ for (let y=0; y<17; y+=2) {
     board.appendChild(d);
   }
 }
-
-board.style.width = 480 + "px";
-board.style.height = 480+70 + "px";
-board.style.margin = "0 auto";
