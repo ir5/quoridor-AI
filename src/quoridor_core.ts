@@ -1,10 +1,10 @@
 export type Pos = [number, number];
 
-function add(p: Pos, q: Pos) : Pos {
+export function add(p: Pos, q: Pos) : Pos {
   return [p[0] + q[0], p[1] + q[1]];
 }
 
-function isInside(p: Pos) : boolean {
+export function isInside(p: Pos) : boolean {
   const [y, x] = p;
   return y >= 0 && x >= 0 && y < 17 && x < 17;
 }
@@ -55,6 +55,15 @@ export class State {
 
   getField(pos: Pos) : number {
     return this.field[pos[0] * 17 + pos[1]];
+  }
+
+  clone() : State {
+    let s: State = new State(0);
+    s.field = [...this.field];
+    s.turn = this.turn;
+    s.walls = [...this.walls];
+    s.poses = [...this.poses];
+    return s;
   }
 }
 

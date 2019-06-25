@@ -25,7 +25,7 @@ function invokeAct(event: Event) {
 
   setTimeout(() => {
     takeCPUTurn();
-  }, 500);
+  }, 100);
 }
 
 function takeCPUTurn() {
@@ -69,7 +69,6 @@ function showShadowImpl(act: Act) {
 }
 
 function showShadowEvent(event: Event) {
-  console.log(g_gameover);
   if (g_gameover) return;
 
   let act = JSON.parse((event.target as HTMLDivElement).dataset["pos"]);
@@ -111,7 +110,11 @@ function showWinningText(winning_player: number) {
   }
   d.style.left = "0px";
   d.classList.add("qf_winning_text");
-  d.innerText = "MORUO WON!!";
+  if (winning_player == 0) {
+    d.innerText = "YOU WON!!";
+  } else {
+    d.innerText = "CPU WON!!";
+  }
 
   boardDiv.appendChild(d);
 }
@@ -302,7 +305,7 @@ function updateBoard(act: Act) {
     setTimeout(() => {
       d.style.transform = "scale(1)";
       d.style.opacity = "1";
-    }, 100);
+    }, 50);
   }
 
   // update the state
