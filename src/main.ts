@@ -13,43 +13,49 @@ function isValid(act: Act) : boolean {
 }
 
 function invokeAct(event: Event) {
+  if (g_gameover) return;
   let s = (event.target as HTMLDivElement).dataset["pos"];
   let act = JSON.parse(s);
 
   if (!isValid(act)) return;
+  g_humans_turn = false;
+  g_delayed_shadow_act = null;
   updateBoard(act);
-
-  const winner = isGameOver(g_state);
-  if (winner >= 0) {
-    showWinningText(winner);
-  }
+  if (g_gameover) return;
 
   setTimeout(() => {
-    let cpu_act = naiveAgent(g_state);
-    updateBoard(cpu_act);
+    takeCPUTurn();
   }, 500);
 }
 
-function showPieceShadow(event: Event) {
-  let [y, x] = JSON.parse((event.target as HTMLDivElement).dataset["pos"]);
-  if (isValid([y, x])) {
+function takeCPUTurn() {
+  if (g_gameover) return;
+
+  let cpu_act = naiveAgent(g_state);
+  updateBoard(cpu_act);
+
+  if (g_gameover) return;
+
+  g_humans_turn = true;
+  if (g_delayed_shadow_act != null) {
+    showShadowImpl(g_delayed_shadow_act);
+    g_delayed_shadow_act = null;
+  }
+}
+
+function showShadowImpl(act: Act) {
+  const [y, x] = act;
+
+  if (!isValid([y, x])) return;
+
+  if (y % 2 == 0 && x % 2 == 0) {
+    // piece shadow
     const shadowDiv = document.querySelector(".qf_" + turnString(g_state.turn) + "piece2") as HTMLDivElement;
     shadowDiv.style.top = (topPx(y) + 2) + "px";
     shadowDiv.style.left = (topPx(x) + 2) + "px";
     shadowDiv.style.visibility = "visible";
-  }
-}
-
-function clearPieceShadow(event: Event) {
-  for (let p = 0; p <= 1; p++) {
-    const shadowDiv = document.querySelector(".qf_" + turnString(p) + "piece2") as HTMLDivElement;
-    shadowDiv.style.visibility = "hidden";
-  }
-}
-
-function showWallShadow(event: Event) {
-  let [y, x] = JSON.parse((event.target as HTMLDivElement).dataset["pos"]);
-  if (isValid([y, x])) {
+  } else {
+    // wall shadow
     const dir = y % 2;
     const shadowDiv = document.querySelector(`.qf_wall[data-wall_shadow="${g_state.turn}${dir}"]`) as HTMLDivElement;
     if (dir == 0) {
@@ -59,6 +65,27 @@ function showWallShadow(event: Event) {
     }
     shadowDiv.style.left = topPx(x) + "px";
     shadowDiv.style.visibility = "visible";
+  }
+}
+
+function showShadowEvent(event: Event) {
+  console.log(g_gameover);
+  if (g_gameover) return;
+
+  let act = JSON.parse((event.target as HTMLDivElement).dataset["pos"]);
+
+  if (!g_humans_turn) {
+    g_delayed_shadow_act = act;
+    return;
+  }
+
+  showShadowImpl(act);
+}
+
+function clearPieceShadow(event: Event) {
+  for (let p = 0; p <= 1; p++) {
+    const shadowDiv = document.querySelector(".qf_" + turnString(p) + "piece2") as HTMLDivElement;
+    shadowDiv.style.visibility = "hidden";
   }
 }
 
@@ -129,7 +156,7 @@ function prepareGameState() : State {
       d.dataset["pos"] = JSON.stringify([y, x]);
       d.classList.add("qf_board_grid");
       d.addEventListener("click", invokeAct);
-      d.addEventListener("mouseenter", showPieceShadow);
+      d.addEventListener("mouseenter", showShadowEvent);
       d.addEventListener("mouseleave", clearPieceShadow);
 
       boardDiv.appendChild(d);
@@ -165,7 +192,7 @@ function prepareGameState() : State {
       d.dataset["pos"] = JSON.stringify([y, x]);
       d.classList.add("qf_board_space");
       d.addEventListener("click", invokeAct);
-      d.addEventListener("mouseenter", showWallShadow);
+      d.addEventListener("mouseenter", showShadowEvent);
       d.addEventListener("mouseleave", clearWallShadow);
 
       boardDiv.appendChild(d);
@@ -283,9 +310,19 @@ function updateBoard(act: Act) {
 
   // update the candidate actions
   g_candidate_acts = getCandidateActs(g_state);
+
+  // check gameover
+  const winner = isGameOver(g_state);
+  if (winner >= 0) {
+    showWinningText(winner);
+    g_gameover = true;
+  }
 }
 
 initializeAgentButtons();
 let g_state = prepareGameState();
 let g_candidate_acts = getCandidateActs(g_state);
 let g_agent_name = "Manual";
+let g_humans_turn = true;
+let g_delayed_shadow_act: Act = null;
+let g_gameover = false;
