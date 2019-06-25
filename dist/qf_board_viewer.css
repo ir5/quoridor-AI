@@ -144,13 +144,13 @@ http://opensource.org/licenses/mit-license.php
 
 	border-radius: 7% / 14%;
 }
-.qf_b_back, .qf_b_next {
+.qf_button_ai {
 	background-color: #D76969;
 }
-.qf_b_back:hover, .qf_b_next:hover {
+.qf_button_ai:hover {
 	background-color: #E17878;
 }
-.qf_b_back:active, .qf_b_next:active {
+.qf_button_ai:active {
 	background-color: #EB8484;
 }
 .qf_cb_cover {

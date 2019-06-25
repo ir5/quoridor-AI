@@ -95,6 +95,28 @@ function topPx(idx: number) : number {
   return 40 * a + 10 * b;
 }
 
+function toggleAgent(event: Event) {
+  const g_agent_name = (event.target as HTMLDivElement).innerText;
+}
+
+function initializeAgentButtons() {
+  const agent_names = ["Manual", "Naive"];
+  const buttonsDiv = document.querySelector(".qf_controlpanel") as HTMLDivElement;
+  for (let i = 0; i < agent_names.length; i++) {
+    let b = document.createElement("button");
+    b.style.width = 100 + "px";
+    b.style.height = 25 + "px";
+    b.style.top = (Math.floor(i / 4) * 30) + "px";
+    b.style.left = ((i % 4) * 110) + "px";
+    b.classList.add("qf_control_button");
+    b.classList.add("qf_button_ai");
+    b.innerText = agent_names[i];
+    b.addEventListener("click", toggleAgent);
+
+    buttonsDiv.appendChild(b);
+  }
+}
+
 function prepareGameState() : State {
   // cells
   for (let y=0; y<17; y+=2) {
@@ -173,7 +195,7 @@ function prepareGameState() : State {
     }
   }
 
-  let initial_state = new State(1);
+  let initial_state = new State(0);
 
   // remaining walls
   for (let i = 0; i < initial_state.walls[0]; i++) {
@@ -263,5 +285,7 @@ function updateBoard(act: Act) {
   g_candidate_acts = getCandidateActs(g_state);
 }
 
+initializeAgentButtons();
 let g_state = prepareGameState();
 let g_candidate_acts = getCandidateActs(g_state);
+let g_agent_name = "Manual";
