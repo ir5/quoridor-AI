@@ -14,6 +14,7 @@ function isValid(act: Act) : boolean {
 
 function invokeAct(event: Event) {
   if (g_gameover) return;
+  if (!g_humans_turn) return;
   let s = (event.target as HTMLDivElement).dataset["pos"];
   let act = JSON.parse(s);
 
