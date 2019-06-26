@@ -1,5 +1,6 @@
 import {Pos, State, Act, getCandidateActs, applyAct, isGameOver} from "./quoridor_core";
 import {naiveAgent} from "./agents/naive/naive"
+import {alphaBetaAgent} from "./agents/alphabeta/alphabeta"
 
 const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
 
@@ -32,7 +33,8 @@ function invokeAct(event: Event) {
 function takeCPUTurn() {
   if (g_gameover) return;
 
-  let cpu_act = naiveAgent(g_state);
+  // let cpu_act = naiveAgent(g_state);
+  let cpu_act = alphaBetaAgent(g_state);
   updateBoard(cpu_act);
 
   if (g_gameover) return;
