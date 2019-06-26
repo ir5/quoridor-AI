@@ -5,7 +5,11 @@ function shortestPath(state: State, player: number) : number {
   let visited: boolean[] = Array(9 * 9).fill(false);
 
   function posToIdx(pos: Pos) : number {
-    return pos[0] / 2 * 9 + pos[1];
+    const y = pos[0] / 2;
+    const x = pos[1] / 2;
+    console.assert(0 <= y && y < 9);
+    console.assert(0 <= x && x < 9);
+    return y * 9 + x;
   }
 
   while (q.length > 0) {
@@ -52,6 +56,7 @@ export function naiveAgent(state: State) : Act {
       applyAct(state2, act1);
       const score = calcScore(state2, state.turn) - calcScore(state2, 1 - state.turn);
       min = Math.min(min, score);
+      if (min < score_max) break;
     }
     const score = min;
 
