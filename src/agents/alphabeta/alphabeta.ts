@@ -42,15 +42,14 @@ function shuffle(acts: Act[]) {
 }
 
 function search(state: State, depth: number, alpha: number, beta: number, maximize: boolean, cpuTurn: number, first: boolean) : [number, Act] {
+  if (depth == 0) {
+    const score = -shortestPath(state, cpuTurn) + shortestPath(state, 1 - cpuTurn);
+    return [score, [-1, -1]];
+  }
   const winner = isGameOver(state);
   if (winner >= 0) {
     if (winner == cpuTurn) return [+1000, [-1, -1]];
     else return [-1000, [-1, -1]];
-  }
-
-  if (depth == 0) {
-    const score = -shortestPath(state, cpuTurn) + shortestPath(state, 1 - cpuTurn);
-    return [score, [-1, -1]];
   }
   const acts: Act[] = getCandidateActs(state);
 
