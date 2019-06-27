@@ -7,8 +7,6 @@ function shortestPath(state: State, player: number) : number {
   function posToIdx(pos: Pos) : number {
     const y = pos[0] / 2;
     const x = pos[1] / 2;
-    console.assert(0 <= y && y < 9);
-    console.assert(0 <= x && x < 9);
     return y * 9 + x;
   }
 
@@ -34,47 +32,60 @@ function shortestPath(state: State, player: number) : number {
   return 1e6;
 }
 
-function search(state: State, depth: number, alpha: number, beta: number, maximize: boolean, cpuTurn: number) : [number, Act] {
+function shuffle(acts: Act[]) {
+  for (let i = 0; i < acts.length; i++) {
+    const k = Math.floor(Math.random() * (i + 1));
+    const temp = acts[i];
+    acts[i] = acts[k];
+    acts[k] = temp;
+  }
+}
+
+function search(state: State, depth: number, alpha: number, beta: number, maximize: boolean, cpuTurn: number, first: boolean) : [number, Act] {
+  const winner = isGameOver(state);
+  if (winner >= 0) {
+    if (winner == cpuTurn) return [+1000, [-1, -1]];
+    else return [-1000, [-1, -1]];
+  }
+
   if (depth == 0) {
     const score = -shortestPath(state, cpuTurn) + shortestPath(state, 1 - cpuTurn);
     return [score, [-1, -1]];
   }
   const acts: Act[] = getCandidateActs(state);
 
+  if (first) shuffle(acts);
+
   let value = maximize ? -1e9 : +1e9;
-  let best_acts: Act[] = [];
+  let best_act: Act = null;
   for (let act of acts) {
     let nstate = state.clone();
     applyAct(nstate, act);
 
-    const [score, _] = search(nstate, depth - 1, alpha, beta, !maximize, cpuTurn);
+    const [score, _] = search(nstate, depth - 1, alpha, beta, !maximize, cpuTurn, false);
     if (maximize) {
       // value = Math.max(value, score);
       if (value < score) {
         value = score;
-        best_acts = [act];
-      } else if (value == score) {
-        best_acts.push(act);
+        best_act = act;
       }
-      alpha = Math.max(alpha, value);
+      alpha = Math.max(alpha, score);
     } else {
       // value = Math.min(value, score);
       if (value > score) {
         value = score;
-        best_acts = [act];
-      } else if (value == score) {
-        best_acts.push(act);
+        best_act = act;
       }
-      beta = Math.min(beta, value);
+      beta = Math.min(beta, score);
     }
-    if (alpha > beta) break;
+    if (alpha >= beta) break;
+
   }
-  const best_act = best_acts[Math.floor(best_acts.length * Math.random())];
   return [value, best_act];
 }
 
 export function alphaBetaAgent(state: State) : Act {
   const depth = 3;
-  const [_, act] = search(state, depth, -1e9, +1e9, true, state.turn);
+  const [_, act] = search(state, depth, -1e9, +1e9, true, state.turn, true);
   return act;
 }
