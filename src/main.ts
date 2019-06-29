@@ -1,4 +1,4 @@
-import {Pos, State, Act, getCandidateActs, applyAct, isGameOver} from "./quoridor_core";
+import {movedPos, State, Act, decomposeAct, getCandidateActs, applyAct, isGameOver} from "./quoridor_core";
 import {naiveAgent} from "./agents/naive/naive"
 import {alphaBetaAgent} from "./agents/alphabeta/alphabeta"
 
@@ -9,15 +9,14 @@ function turnString(turn: number) : string {
 }
 
 function isValid(act: Act) : boolean {
-  let [ay, ax] = act;
-  return g_candidate_acts.some((e) => { return e[0] == act[0] && e[1] == act[1]; });
+  return g_candidate_acts.includes(act);
 }
 
 function invokeAct(event: Event) {
   if (g_gameover) return;
   if (!g_humans_turn) return;
   let s = (event.target as HTMLDivElement).dataset["pos"];
-  let act = JSON.parse(s);
+  let act = parseInt(s);
 
   if (!isValid(act)) return;
   g_humans_turn = false;
@@ -35,6 +34,7 @@ function takeCPUTurn() {
 
   // let cpu_act = naiveAgent(g_state);
   let cpu_act = alphaBetaAgent(g_state);
+  // let cpu_act = pruningAlphaBetaAgent(g_state);
   updateBoard(cpu_act);
 
   if (g_gameover) return;
@@ -47,9 +47,9 @@ function takeCPUTurn() {
 }
 
 function showShadowImpl(act: Act) {
-  const [y, x] = act;
+  if (!isValid(act)) return;
 
-  if (!isValid([y, x])) return;
+  const [y, x] = decomposeAct(act);
 
   if (y % 2 == 0 && x % 2 == 0) {
     // piece shadow
@@ -74,7 +74,7 @@ function showShadowImpl(act: Act) {
 function showShadowEvent(event: Event) {
   if (g_gameover) return;
 
-  let act = JSON.parse((event.target as HTMLDivElement).dataset["pos"]);
+  let act = parseInt((event.target as HTMLDivElement).dataset["pos"]);
 
   if (!g_humans_turn) {
     g_delayed_shadow_act = act;
@@ -159,7 +159,7 @@ function prepareGameState() : State {
       d.style.height = 40 + "px";
       d.style.top = topPx(y) + "px";
       d.style.left = topPx(x) + "px";
-      d.dataset["pos"] = JSON.stringify([y, x]);
+      d.dataset["pos"] = "" + (y * 17 + x);
       d.classList.add("qf_board_grid");
       d.addEventListener("click", invokeAct);
       d.addEventListener("mouseenter", showShadowEvent);
@@ -195,7 +195,7 @@ function prepareGameState() : State {
       }
       d.style.top = topPx(y) + "px";
       d.style.left = topPx(x) + "px";
-      d.dataset["pos"] = JSON.stringify([y, x]);
+      d.dataset["pos"] = "" + (y * 17 + x);
       d.classList.add("qf_board_space");
       d.addEventListener("click", invokeAct);
       d.addEventListener("mouseenter", showShadowEvent);
@@ -249,7 +249,7 @@ function prepareGameState() : State {
   }
 
   for (let p = 0; p <= 1; p++) {
-    let [y, x] = initial_state.poses[p];
+    let [y, x] = decomposeAct(initial_state.poses[p]);
 
     let d = document.createElement("div");
     d.style.width = 36 + "px";
@@ -266,7 +266,7 @@ function prepareGameState() : State {
 }
 
 function updateBoard(act: Act) {
-  const [y, x] = act;
+  const [y, x] = decomposeAct(act);
 
   if (x % 2 == 0 && y % 2 == 0) {
     // piece movement
