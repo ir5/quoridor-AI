@@ -61,11 +61,7 @@ function showShadowImpl(act: Act) {
     // wall shadow
     const dir = y % 2;
     const shadowDiv = document.querySelector(`.qf_wall[data-wall_shadow="${g_state.turn}${dir}"]`) as HTMLDivElement;
-    if (dir == 0) {
-      shadowDiv.style.top = topPx(y - 2) + "px";
-    } else {
-      shadowDiv.style.top = topPx(y) + "px";
-    }
+    shadowDiv.style.top = topPx(y) + "px";
     shadowDiv.style.left = topPx(x) + "px";
     shadowDiv.style.visibility = "visible";
   }
@@ -289,7 +285,7 @@ function updateBoard(act: Act) {
       // vertical
       d.style.width = 10 + "px";
       d.style.height = 90 + "px";
-      d.style.top = topPx(y - 2) + "px";
+      d.style.top = topPx(y) + "px";
       d.classList.add("qf_vwall");
     }
     d.style.left = topPx(x) + "px";

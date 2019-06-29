@@ -101,7 +101,7 @@ export function getCandidateActs(state: State) : Act[] {
     for (let y = 0; y < 17; y++) {
   candidate_loop:
       for (let x = (y + 1) % 2; x < 17; x += 2) {
-        const dir: number = (y % 2 == 0) ? 1 : 2;
+        const dir: number = (y % 2 == 0) ? 3 : 2;
         // the position must not be occupied
         let places: number[] = [];
         let now = y * 17 + x;
@@ -165,7 +165,7 @@ export function applyAct(state: State, act: Act) {
   } else if (x % 2 != y % 2) {
     // wall placement
     state.walls[state.turn]--;
-    const dir: number = (y % 2 == 0) ? 1 : 2;
+    const dir: number = (y % 2 == 0) ? 3 : 2;
 
     let now = act;
     for (let i = 0; i < 3; i++) {
