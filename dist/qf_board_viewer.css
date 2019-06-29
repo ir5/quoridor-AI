@@ -139,14 +139,22 @@ http://opensource.org/licenses/mit-license.php
 	border: none;
 	outline: none;
 	cursor: pointer;
-	
+
 	color: #F7F2EE;
 	text-align: center;
 
 	border-radius: 7% / 14%;
 }
+.qf_toggle_button input[type="radio"] {
+	position: absolute;
+	clip: rect(0, 0, 0, 0);
+}
+
 .qf_button_ai {
 	background-color: #D76969;
+}
+input[type="radio"]:checked + .qf_button_ai {
+	background-color: #C65454;
 }
 .qf_button_ai:hover {
 	background-color: #E17878;
@@ -154,6 +162,7 @@ http://opensource.org/licenses/mit-license.php
 .qf_button_ai:active {
 	background-color: #EB8484;
 }
+
 .qf_cb_cover {
 	cursor: default;
 	background-color: rgba(245, 243, 232, 0.8);
