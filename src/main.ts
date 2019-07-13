@@ -1,15 +1,16 @@
 import {movedPos, State, Act, decomposeAct, getCandidateActs, applyAct, isGameOver} from "./quoridor_core";
-import {naiveAgent} from "./agents/naive/naive"
+// import {naiveAgent} from "./agents/naive/naive"
 import {alphaBetaAgent} from "./agents/alphabeta/alphabeta"
-import {pruningAlphaBetaAgent} from "./agents/alphabeta/alphabeta_pruning"
 
 const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
 
-type Agent = (st: State) => number;
+type Agent = (st: State) => Act;
 const agents: {[_: string]: Agent}  = {
-  "Manual": null,
-  "Naive": naiveAgent,
-  "AlphaBeta": alphaBetaAgent,
+  // "Manual": null,
+  "Lv.1": (state: State) => { return alphaBetaAgent(state, 1); },
+  "Lv.2": (state: State) => { return alphaBetaAgent(state, 2); },
+  "Lv.3": (state: State) => { return alphaBetaAgent(state, 3); },
+  "Lv.4": (state: State) => { return alphaBetaAgent(state, 4); },
 };
 
 function turnString(turn: number) : string {
@@ -134,7 +135,7 @@ function topPx(idx: number) : number {
 
 function toggleAgent(event: Event) {
   let checkbox = event.target as HTMLInputElement;
-  if(checkbox.checked) {
+  if (checkbox.checked) {
     g_agent_name = checkbox.value;
   }
 }
@@ -156,9 +157,9 @@ function initializeAgentButtons() {
 
     let r = document.createElement("input");
     r.type = "radio";
-    r.name = "agent"
+    r.name = "agent";
     r.value = agent_name;
-    if(agent_name == "Manual") {
+    if(agent_name == "Lv.1") {
       r.checked = true
     }
     r.addEventListener("change", toggleAgent);
@@ -347,7 +348,7 @@ function updateBoard(act: Act) {
 initializeAgentButtons();
 let g_state = prepareGameState();
 let g_candidate_acts = getCandidateActs(g_state);
-let g_agent_name = "Manual";
+let g_agent_name = "Lv.1";
 let g_humans_turn = true;
 let g_delayed_shadow_act: Act = null;
 let g_gameover = false;

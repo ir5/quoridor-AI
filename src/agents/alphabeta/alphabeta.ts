@@ -52,8 +52,7 @@ function search(state: State, depth: number, alpha: number, beta: number, maximi
   return [value, best_act];
 }
 
-export function alphaBetaAgent(state: State) : Act {
-  const depth = 3;
+export function alphaBetaAgent(state: State, depth: number) : Act {
   const [_, act] = search(state, depth, -1e9, +1e9, true, state.turn, true);
   return act;
 }

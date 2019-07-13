@@ -154,7 +154,8 @@ http://opensource.org/licenses/mit-license.php
 	background-color: #D76969;
 }
 input[type="radio"]:checked + .qf_button_ai {
-	background-color: #C65454;
+	background-color: #A6A654;
+        font-weight:bold;
 }
 .qf_button_ai:hover {
 	background-color: #E17878;
