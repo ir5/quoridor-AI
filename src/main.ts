@@ -5,6 +5,13 @@ import {pruningAlphaBetaAgent} from "./agents/alphabeta/alphabeta_pruning"
 
 const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
 
+type Agent = (st: State) => number;
+const agents: {[_: string]: Agent}  = {
+  "Manual": null,
+  "Naive": naiveAgent,
+  "AlphaBeta": alphaBetaAgent,
+};
+
 function turnString(turn: number) : string {
   return (turn == 0) ? "b" : "w";
 }
@@ -20,22 +27,22 @@ function invokeAct(event: Event) {
   let act = parseInt(s);
 
   if (!isValid(act)) return;
-  g_humans_turn = false;
-  g_delayed_shadow_act = null;
+
   updateBoard(act);
   if (g_gameover) return;
 
-  setTimeout(() => {
-    takeCPUTurn();
-  }, 100);
+  if(agents[g_agent_name]) {
+    g_humans_turn = false;
+    g_delayed_shadow_act = null;
+    setTimeout(takeCPUTurn, 100);
+  }
 }
 
 function takeCPUTurn() {
   if (g_gameover) return;
 
-  // let cpu_act = naiveAgent(g_state);
-  let cpu_act = alphaBetaAgent(g_state);
-  // let cpu_act = pruningAlphaBetaAgent(g_state);
+  let agent = agents[g_agent_name];
+  let cpu_act = agent(g_state);
   updateBoard(cpu_act);
 
   if (g_gameover) return;
@@ -126,24 +133,39 @@ function topPx(idx: number) : number {
 }
 
 function toggleAgent(event: Event) {
-  const g_agent_name = (event.target as HTMLDivElement).innerText;
+  let checkbox = event.target as HTMLInputElement;
+  if(checkbox.checked) {
+    g_agent_name = checkbox.value;
+  }
 }
 
 function initializeAgentButtons() {
-  const agent_names = ["Manual", "Naive"];
   const buttonsDiv = document.querySelector(".qf_controlpanel") as HTMLDivElement;
-  for (let i = 0; i < agent_names.length; i++) {
-    let b = document.createElement("button");
+  for(let [i, agent_name] of Object.keys(agents).entries()) {
+    let l = document.createElement("label");
+    l.classList.add("qf_toggle_button")
+
+    let b = document.createElement("div");
+    b.innerText = agent_name;
     b.style.width = 100 + "px";
     b.style.height = 25 + "px";
     b.style.top = (Math.floor(i / 4) * 30) + "px";
     b.style.left = ((i % 4) * 110) + "px";
     b.classList.add("qf_control_button");
     b.classList.add("qf_button_ai");
-    b.innerText = agent_names[i];
-    b.addEventListener("click", toggleAgent);
 
-    buttonsDiv.appendChild(b);
+    let r = document.createElement("input");
+    r.type = "radio";
+    r.name = "agent"
+    r.value = agent_name;
+    if(agent_name == "Manual") {
+      r.checked = true
+    }
+    r.addEventListener("change", toggleAgent);
+
+    l.appendChild(r);
+    l.appendChild(b)
+    buttonsDiv.appendChild(l);
   }
 }
 
