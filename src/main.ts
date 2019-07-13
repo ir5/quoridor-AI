@@ -1,6 +1,7 @@
 import {movedPos, State, Act, decomposeAct, getCandidateActs, applyAct, isGameOver} from "./quoridor_core";
 import {naiveAgent} from "./agents/naive/naive"
 import {alphaBetaAgent} from "./agents/alphabeta/alphabeta"
+import {pruningAlphaBetaAgent} from "./agents/alphabeta/alphabeta_pruning"
 
 const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
 
