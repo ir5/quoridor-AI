@@ -1,17 +1,7 @@
 import {movedPos, State, Act, decomposeAct, getCandidateActs, applyAct, isGameOver} from "./quoridor_core";
-// import {naiveAgent} from "./agents/naive/naive"
-import {alphaBetaAgent} from "./agents/alphabeta/alphabeta"
+import {agent_list} from "./agents/agent_list";
 
 const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement;
-
-type Agent = (st: State) => Act;
-const agents: {[_: string]: Agent}  = {
-  // "Manual": null,
-  "CPU Lv.1": (state: State) => { return alphaBetaAgent(state, 1); },
-  "CPU Lv.2": (state: State) => { return alphaBetaAgent(state, 2); },
-  "CPU Lv.3": (state: State) => { return alphaBetaAgent(state, 3); },
-  "CPU Lv.4": (state: State) => { return alphaBetaAgent(state, 4); },
-};
 
 function turnString(turn: number) : string {
   return (turn == 0) ? "b" : "w";
@@ -32,7 +22,7 @@ function invokeAct(event: Event) {
   updateBoard(act);
   if (g_gameover) return;
 
-  if(agents[g_agent_name]) {
+  if (agent_list[g_agent_name]) {
     g_humans_turn = false;
     g_delayed_shadow_act = null;
 
@@ -53,19 +43,24 @@ function invokeAct(event: Event) {
 function takeCPUTurn() {
   if (g_gameover) return;
 
-  let agent = agents[g_agent_name];
-  let cpu_act = agent(g_state);
-  updateBoard(cpu_act);
+  const worker = new Worker("worker.js");
 
-  document.querySelectorAll(".qf_thinking_text").forEach(d => d && d.remove());
+  worker.addEventListener('message', message => {
+    const cpu_act: Act = message.data as Act;
+    updateBoard(cpu_act);
 
-  if (g_gameover) return;
+    document.querySelectorAll(".qf_thinking_text").forEach(d => d && d.remove());
 
-  g_humans_turn = true;
-  if (g_delayed_shadow_act != null) {
-    showShadowImpl(g_delayed_shadow_act);
-    g_delayed_shadow_act = null;
-  }
+    if (g_gameover) return;
+
+    g_humans_turn = true;
+    if (g_delayed_shadow_act != null) {
+      showShadowImpl(g_delayed_shadow_act);
+      g_delayed_shadow_act = null;
+    }
+  });
+
+  worker.postMessage([g_state, g_agent_name]);
 }
 
 function showShadowImpl(act: Act) {
@@ -157,7 +152,7 @@ function toggleAgent(event: Event) {
 
 function initializeAgentButtons() {
   const buttonsDiv = document.querySelector(".qf_controlpanel") as HTMLDivElement;
-  for(let [i, agent_name] of Object.keys(agents).entries()) {
+  for(let [i, agent_name] of Object.keys(agent_list).entries()) {
     let l = document.createElement("label");
     l.classList.add("qf_toggle_button")
 

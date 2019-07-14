@@ -2,11 +2,15 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    bundle: './src/main.ts'
-  },  
+    main: './src/main.ts',
+    worker: './src/agent.worker.ts'
+  },
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'main.js'
+    filename: "[name].js",
+    library: "[name]",
+    // libraryTarget: "umd"
+    // filename: 'main.js'
   },
   resolve: {
     extensions:['.ts', '.js']

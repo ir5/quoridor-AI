@@ -6,7 +6,12 @@
     "module": "commonjs",
     "target": "es2018",
     "allowJs": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "lib": [
+      "webworker",
+      "es6",
+      "dom"
+    ]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
