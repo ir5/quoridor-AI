@@ -5,6 +5,21 @@ Released under the MIT license
 http://opensource.org/licenses/mit-license.php
  */
 
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  width: 800px;
+}
+
+.title {
+  text-align: center;
+  font-size: 50px;
+  font-weight: bold;
+  color: #303030;
+  text-shadow: 0 3px 8px #afafaf;
+  text-decoration: none;
+}
+
 .qf_board_viewer {
   position: relative;
   margin: 0 auto;

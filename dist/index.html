@@ -3,17 +3,55 @@
   <head>
     <meta charset="UTF-8">
     <meta name="description" content="">
-    <title>q</title>
+    <title>Quoridor AI (コリドール)</title>
     <link rel="stylesheet" href="qf_board_viewer.css">
   </head>
   <body>
+    <div class="title">
+      Quoridor AI
+    </div>
     <div class="qf_board_viewer" style="width: 480px; height: 660px;">
       <div class="qf_gameboard" style="width: 480px; height: 580px;">
         <div class ="qf_inner_gameboard" style="width: 440px; height: 440px; top: 70px; left: 20px">
         </div>
       </div>
-      <div class="qf_controlpanel" style="width: 440px; height: 660px; top: 590px; left: 20px;">
+      <div class="qf_controlpanel" style="width: 440px; height: 60px; top: 590px; left: 20px;">
       </div>
+    </div>
+
+
+    <div class="container">
+      <hr>
+      <h1>Quoridor (コリドール) のルール</h1>
+      1回のターンで次のどちらかの行動を取れます。
+      <ul>
+        <li>自分の駒を上下左右のいずれかに1マス動かす。もし相手の駒が隣接してる場合は相手の駒を飛び越して移動できる。</li>
+        <li>長さ2の板を盤面に配置する。</li>
+      </ul>
+      駒を初期位置の反対側の行(一番上 or 一番下の行)に移動させた方が勝ちです。
+      駒は板を超えて移動することができません。
+      板は10枚まで置くことができます。
+      板を置くとき、相手がゴールできなくなるように配置することはできません。
+      詳しいルールは <a href="https://www.quoridorfansite.com/foa/rule.html" target="_blank">Quoridor Fansite のページ</a>などを参照してください。
+
+      <h1>実装</h1>
+      ゲーム AI ではアルファベータ法を実装しています。背面置きが好きなようです。
+      レベルは読む深さ変えて調整しています。
+      CSS は <a href="https://www.quoridorfansite.com/" target="_blank">Quoridor Fansite</a> さんの <a href="https://www.quoridorfansite.com/tools/freeboard.html" target="_blank">Free Board</a> のものを改変して使っています。
+
+      <h1>リンク</h1>
+      他の Quoridor の AI 実装
+      <ul>
+        <li><a href="https://gorisanson.github.io/quoridor-ai/" target="_blank">Lee Kyutaea 氏によるモンテカルロ木探索実装</a>: とても強いです。UI の完成度が高いです。</li>
+        <li><a href="https://danielborowski.github.io/site/quoridor-ai/display.html" target="_blank">Daniel Borowski 氏による実装(アルファベータ法？)</a>: 気楽に対戦できます。</li>
+      </ul>
+
+      強くなるためのテクニック集
+      <ul>
+        <li><a href="https://quoridor.jp/wiki/" target="_blank">Quoridor（コリドール）考察wiki</a>: テクニックについて非常によくまとめられています。</li>
+        <li><a href="https://www.quoridorfansite.com/" target="_blank">Quoridor Fansite</a>: ゲームの歴史やテクニックについて記されています。</li>
+        <li><a href="https://quoridorstrats.wordpress.com/" target="_blank">Quoridor Strats (英語)</a>: 英語で情報がまとまっています。</li>
+      </ul>
     </div>
 
     <script src="main.js"></script>
