@@ -35,6 +35,17 @@ function invokeAct(event: Event) {
   if(agents[g_agent_name]) {
     g_humans_turn = false;
     g_delayed_shadow_act = null;
+
+    let d = document.createElement("div");
+    d.style.width = "440px";
+    d.style.height = "40px";
+    d.style.top = "-50px";
+    d.style.left = "0px";
+    d.classList.add("qf_thinking_text");
+    d.classList.add("to_be_disposed");
+    d.innerText = "CPU's TURN...";
+    boardDiv.appendChild(d);
+
     setTimeout(takeCPUTurn, 100);
   }
 }
@@ -45,6 +56,8 @@ function takeCPUTurn() {
   let agent = agents[g_agent_name];
   let cpu_act = agent(g_state);
   updateBoard(cpu_act);
+
+  document.querySelectorAll(".qf_thinking_text").forEach(d => d && d.remove());
 
   if (g_gameover) return;
 
