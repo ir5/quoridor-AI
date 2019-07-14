@@ -1,3 +1,6 @@
+// The following repository was useful for writing WebWorker code.
+// https://github.com/Qwaz/webworker-with-typescript/tree/master/multiple-entry
+
 import {State} from "./quoridor_core";
 import {agent_list} from "./agents/agent_list";
 
