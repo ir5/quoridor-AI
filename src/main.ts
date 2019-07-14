@@ -46,7 +46,10 @@ function takeCPUTurn() {
   const worker = new Worker("worker.js");
 
   worker.addEventListener('message', message => {
-    const cpu_act: Act = message.data as Act;
+    const [cpu_act, turn] = message.data;
+    if (g_state.turn != turn) {
+      return;
+    }
     updateBoard(cpu_act);
 
     document.querySelectorAll(".qf_thinking_text").forEach(d => d && d.remove());
