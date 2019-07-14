@@ -7,10 +7,10 @@ const boardDiv = document.querySelector(".qf_inner_gameboard") as HTMLDivElement
 type Agent = (st: State) => Act;
 const agents: {[_: string]: Agent}  = {
   // "Manual": null,
-  "Lv.1": (state: State) => { return alphaBetaAgent(state, 1); },
-  "Lv.2": (state: State) => { return alphaBetaAgent(state, 2); },
-  "Lv.3": (state: State) => { return alphaBetaAgent(state, 3); },
-  "Lv.4": (state: State) => { return alphaBetaAgent(state, 4); },
+  "CPU Lv.1": (state: State) => { return alphaBetaAgent(state, 1); },
+  "CPU Lv.2": (state: State) => { return alphaBetaAgent(state, 2); },
+  "CPU Lv.3": (state: State) => { return alphaBetaAgent(state, 3); },
+  "CPU Lv.4": (state: State) => { return alphaBetaAgent(state, 4); },
 };
 
 function turnString(turn: number) : string {
@@ -118,10 +118,11 @@ function showWinningText(winning_player: number) {
   }
   d.style.left = "0px";
   d.classList.add("qf_winning_text");
+  d.classList.add("to_be_disposed");
   if (winning_player == 0) {
-    d.innerText = "YOU WON!!";
+    d.innerText = "YOU WIN!!";
   } else {
-    d.innerText = "CPU WON!!";
+    d.innerText = "CPU WINS!!";
   }
 
   boardDiv.appendChild(d);
@@ -138,6 +139,7 @@ function toggleAgent(event: Event) {
   if (checkbox.checked) {
     g_agent_name = checkbox.value;
   }
+  resetGameState();
 }
 
 function initializeAgentButtons() {
@@ -159,10 +161,10 @@ function initializeAgentButtons() {
     r.type = "radio";
     r.name = "agent";
     r.value = agent_name;
-    if(agent_name == "Lv.1") {
+    if (i == 0) {
       r.checked = true
     }
-    r.addEventListener("change", toggleAgent);
+    r.addEventListener("click", toggleAgent);
 
     l.appendChild(r);
     l.appendChild(b)
@@ -170,7 +172,7 @@ function initializeAgentButtons() {
   }
 }
 
-function prepareGameState() : State {
+function prepareGameState() {
   // cells
   for (let y=0; y<17; y+=2) {
     for (let x=0; x<17; x+=2) {
@@ -247,11 +249,20 @@ function prepareGameState() : State {
       boardDiv.appendChild(d);
     }
   }
+}
 
-  let initial_state = new State(0);
+function resetGameState() {
+  // remove existing objects
+  document.querySelectorAll(".to_be_disposed").forEach(d => d && d.remove());
 
-  // remaining walls
-  for (let i = 0; i < initial_state.walls[0]; i++) {
+  g_state = new State(0);
+  g_humans_turn = true;
+  g_delayed_shadow_act = null;
+  g_gameover = false;
+  g_candidate_acts = getCandidateActs(g_state);
+
+  // set remaining walls
+  for (let i = 0; i < g_state.walls[0]; i++) {
     for (let p = 0; p <= 1; p++) {
       let d = document.createElement("div");
       d.style.width = 10 + "px";
@@ -263,13 +274,14 @@ function prepareGameState() : State {
       d.classList.add("qf_" + turnString(p) + "wall");
       d.classList.add("qf_vwall");
       d.classList.add("qf_remaining_" + turnString(p) + "wall"); // for search
+      d.classList.add("to_be_disposed");
 
       boardDiv.appendChild(d);
     }
   }
 
   for (let p = 0; p <= 1; p++) {
-    let [y, x] = decomposeAct(initial_state.poses[p]);
+    let [y, x] = decomposeAct(g_state.poses[p]);
 
     let d = document.createElement("div");
     d.style.width = 36 + "px";
@@ -278,11 +290,10 @@ function prepareGameState() : State {
     d.style.left = (topPx(x) + 2) + "px";
     d.classList.add("qf_piece");
     d.classList.add("qf_" + turnString(p) + "piece");
+    d.classList.add("to_be_disposed");
 
     boardDiv.appendChild(d);
   }
-
-  return initial_state;
 }
 
 function updateBoard(act: Act) {
@@ -316,6 +327,7 @@ function updateBoard(act: Act) {
     d.style.transform = "scale(3)";
     d.style.opacity = "0";
     d.classList.add("qf_wall");
+    d.classList.add("to_be_disposed");
     d.classList.add("qf_" + turnString(g_state.turn) + "wall");
 
     boardDiv.appendChild(d);
@@ -345,10 +357,13 @@ function updateBoard(act: Act) {
   }
 }
 
-initializeAgentButtons();
-let g_state = prepareGameState();
-let g_candidate_acts = getCandidateActs(g_state);
-let g_agent_name = "Lv.1";
-let g_humans_turn = true;
+let g_state: State = null;
+let g_agent_name = "CPU Lv.1";
+let g_humans_turn: boolean = true;
 let g_delayed_shadow_act: Act = null;
-let g_gameover = false;
+let g_gameover: boolean = false;
+let g_candidate_acts: Act[] = [];
+
+initializeAgentButtons();
+prepareGameState();
+resetGameState();
